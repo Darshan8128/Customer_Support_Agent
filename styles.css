@@ -1,0 +1,7 @@
+/* Date AI Chatbot - Minimal Style Overrides */
+header[data-testid="stHeader"] {display: none;}
+footer {display: none;}
+#MainMenu {display: none;}
+[data-testid="stSidebar"] {border-right: 1px solid rgba(99,102,241,0.2);}
+[data-testid="stChatMessage"] {border-radius: 12px; margin-bottom: 8px;}
+div.stButton > button[kind="primary"] {background: linear-gradient(135deg, #6366f1, #8b5cf6); border: none;}

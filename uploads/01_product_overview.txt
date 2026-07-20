@@ -1,0 +1,25 @@
+DATE AI — PRODUCT OVERVIEW
+
+Date AI offers three main subscription tiers plus add-on services.
+
+1. Date AI Starter Plan
+- Monthly: $19/month, Annual: $190/year (2 months free)
+- Includes: up to 500 AI queries/month, 1 user seat, email support, basic knowledge base access
+- Best for: individuals and small teams testing the platform
+
+2. Date AI Pro License
+- Annual only: $499/year
+- Includes: up to 10,000 AI queries/month, 5 user seats, priority email support, advanced analytics dashboard, API access (2,000 calls/month included)
+- Best for: growing teams needing higher usage limits and API access
+
+3. Date AI Enterprise Suite
+- Custom pricing, billed annually or biennially (2-Year plan available at 15% discount)
+- Includes: unlimited AI queries, unlimited user seats, dedicated account manager, 24/7 phone and chat support, custom integrations, SLA guarantees (99.9% uptime)
+- Best for: large organizations with custom workflow needs
+
+Add-on Services:
+- API Credits: sold in blocks of 10,000 calls for $99, valid for 12 months from purchase
+- Custom Integration: one-time engineering engagement starting at $2,500, scoped after a technical requirements call with our integration team (integration-team@dateai.com)
+- Training Package: onboarding sessions and workshops for teams, available as an add-on to Pro or Enterprise plans
+
+All plans include: SSL encryption, GDPR-compliant data handling, and a 14-day free trial for new customers on Starter and Pro tiers.

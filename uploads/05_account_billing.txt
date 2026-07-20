@@ -1,0 +1,30 @@
+DATE AI — ACCOUNT & BILLING
+
+Payment Methods
+- We accept Visa, Mastercard, American Express, and PayPal for Starter and Pro plans.
+- Enterprise Suite customers may also pay via bank transfer or company purchase order, arranged through your dedicated account manager.
+
+Billing Cycles
+- Starter Plan: billed monthly on the date of initial signup, or annually if the annual discount option was selected.
+- Pro License: billed annually only, on the anniversary of the original purchase date.
+- Enterprise Suite: billed annually or biennially per the signed service agreement; biennial billing includes a 15% discount.
+
+Invoices
+- Invoices are automatically emailed to the account's billing contact after each successful charge.
+- Past invoices can be downloaded anytime from Settings > Billing > Invoice History.
+- Enterprise customers requiring custom invoice formatting (PO numbers, tax IDs, etc.) should contact their account manager.
+
+Failed Payments
+- If a payment fails, we retry automatically after 3 days and again after 7 days.
+- Accounts are suspended (read-only access) after 2 failed retry attempts, and fully deactivated after 14 days of non-payment.
+- To resolve a failed payment, update your payment method under Settings > Billing > Payment Methods, then click "Retry Payment Now."
+
+Multi-User Seats
+- Starter Plan includes 1 seat; additional seats are not available on this tier.
+- Pro License includes 5 seats; additional seats can be added at $15/seat/month.
+- Enterprise Suite includes unlimited seats as part of the base contract.
+- Seat management is available under Settings > Team > Manage Seats (admin access required).
+
+Account Deletion
+- Account deletion is permanent and removes all associated data, including knowledge base content and conversation history, after a 30-day recovery grace period.
+- To request account deletion, go to Settings > Account > Delete Account, or contact support directly for assistance.

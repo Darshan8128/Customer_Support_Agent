@@ -1,0 +1,23 @@
+DATE AI — REFUND & CANCELLATION POLICY
+
+Cancellations
+- Monthly plans (Starter): can be cancelled anytime from Settings > Billing > Cancel Subscription. Access continues until the end of the current paid month; no partial refunds are issued for the remaining days.
+- Annual plans (Pro, Enterprise): can be cancelled anytime, but are non-refundable for the unused portion of the year unless cancelled within the first 14 days of the initial purchase (see Refund Eligibility below).
+- API Credits: non-refundable once purchased, but unused credits remain valid for 12 months from purchase date and can be used at any time within that window.
+
+Refund Eligibility
+- New customers on Starter or Pro plans may request a full refund within 14 days of their first payment if they are not satisfied, no questions asked.
+- After the 14-day window, refunds are only granted in cases of: (a) billing errors or duplicate charges, (b) extended service outages exceeding our SLA commitments (Enterprise only), or (c) cancellation processed by mistake due to a platform bug.
+- Refund requests are reviewed by the billing team and typically take 5-7 business days to process once approved. Refunds are issued to the original payment method.
+
+How to Request a Refund
+1. Go to Settings > Billing > Request Refund, or contact support directly with your order ID.
+2. Include the reason for the refund request.
+3. You will receive a confirmation email once the request is under review, and a follow-up once a decision is made.
+
+Order Cancellation (Pending Orders)
+- Orders that have not yet shipped or activated (status: "processing") can be cancelled directly without a refund request, since no charge has been finalized in most cases.
+- Orders already marked "delivered" or "shipped" for physical add-ons (e.g., branded hardware, training material kits) follow standard refund eligibility rules above.
+
+Enterprise Suite Cancellations
+- Enterprise contracts include a 30-day notice period for cancellation as specified in the signed service agreement. Early termination fees may apply per the individual contract terms — contact your dedicated account manager for specifics.

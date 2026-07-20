@@ -1,0 +1,22 @@
+DATE AI — FAQ & TROUBLESHOOTING
+
+Q: How do I reset my password?
+A: Go to Settings > Account > Reset Password. A reset link is sent to your registered email and expires after 30 minutes. If you don't receive it, check your spam folder or contact support to verify your account email.
+
+Q: I'm getting a "rate limit exceeded" error when calling the API.
+A: This means you've exceeded your plan's monthly API call limit. Starter plan users do not get API access by default. Pro plan users get 2,000 calls/month included; additional usage requires purchasing API Credits. Enterprise users have unlimited calls. Check your usage under Settings > API > Usage Dashboard.
+
+Q: Why can't I log in even with the correct password?
+A: Common causes: (1) account temporarily locked after 5 failed login attempts — wait 15 minutes or reset your password, (2) your session expired and cookies need clearing, (3) your account may be suspended due to a billing issue — check Settings > Billing for outstanding invoices.
+
+Q: How do I upgrade or downgrade my plan?
+A: Go to Settings > Billing > Change Plan. Upgrades take effect immediately with prorated billing. Downgrades take effect at the start of your next billing cycle. Enterprise plan changes require contacting your dedicated account manager.
+
+Q: Can I use Date AI with my existing CRM?
+A: Native integrations are available for Salesforce and HubSpot on Pro and Enterprise plans. Other CRM integrations require a Custom Integration engagement — contact integration-team@dateai.com.
+
+Q: My AI query results seem inaccurate or outdated.
+A: This can happen if your knowledge base hasn't been re-indexed recently. Go to Settings > Knowledge Base > Rebuild Index. If the issue persists after rebuilding, contact support with the specific query so our team can investigate.
+
+Q: Is there a mobile app?
+A: Date AI is currently web-based only, optimized for desktop and tablet browsers. A dedicated mobile app is on our public roadmap but does not have a confirmed release date.

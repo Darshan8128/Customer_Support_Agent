@@ -1,0 +1,32 @@
+# Python virtual environment
+.venv/
+venv/
+ENV/
+env/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Streamlit secrets & config
+.streamlit/secrets.toml
+.streamlit/credentials.toml
+
+# Environment variables containing sensitive credentials
+.env
+
+# SQLite databases
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+
+# Vector store index folder
+vectorstore/
+
+# Video demo / large static assets
+Output_video.mp4
+
+# OS generated files
+.DS_Store
+Thumbs.db

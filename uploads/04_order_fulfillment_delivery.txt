@@ -1,0 +1,24 @@
+DATE AI — ORDER FULFILLMENT & DELIVERY
+
+Note: Date AI is primarily a software subscription service. "Orders" refer to subscription purchases, API credit purchases, and optional physical onboarding kits (for Enterprise customers).
+
+Order Status Definitions
+- processing: Payment received, account provisioning in progress. Typically completes within 1-2 business days.
+- shipped: Applies to physical onboarding kits or branded hardware only. Once shipped, tracking information is provided via email and visible in Settings > Orders.
+- delivered: Physical item confirmed delivered by the carrier, or for digital-only orders, account access has been fully activated.
+- on_hold: Order paused, most commonly because a Custom Integration order is awaiting technical requirements from the customer. Check your email for a request from integration-team@dateai.com.
+- cancelled: Order cancelled either by customer request or due to a failed payment. If a refund is applicable, it is processed automatically for cancellations within 24 hours of purchase.
+- refund_pending: A refund request has been submitted and is under review by the billing team.
+
+Typical Timelines
+- Digital subscription activation (Starter, Pro): instant to 1 business day after payment confirmation.
+- Enterprise Suite provisioning: 3-5 business days, including account manager onboarding call.
+- Physical onboarding kits (Enterprise only): 5-7 business days for standard shipping via FedEx, UPS, or DHL depending on region.
+- Custom Integration projects: timeline scoped individually after the technical requirements call; typical range is 2-6 weeks depending on complexity.
+
+Tracking Your Order
+- All orders can be tracked under Settings > Orders using your order ID (format: ORD-XXXX).
+- For physical shipments, a carrier tracking number is provided once the status changes to "shipped."
+
+Delayed Orders
+- If an order remains in "processing" for more than 3 business days without an update, or a "shipped" order has not arrived by its estimated delivery date, customers should contact support to have the issue investigated and, if necessary, escalated to our fulfillment team.

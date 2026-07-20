@@ -1,0 +1,16 @@
+streamlit
+python-dotenv
+langchain
+langchain-google-genai
+langchain-community
+langchain-core
+google-generativeai
+faiss-cpu
+deep-translator
+elevenlabs
+openai-whisper
+sounddevice
+scipy
+PyMuPDF
+langchain_classic
+langdetect
