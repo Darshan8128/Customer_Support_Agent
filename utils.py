@@ -257,7 +257,7 @@ def get_ai_response(query, lang="en"):
         # Initialize Gemini Chat
         # Using gemini-1.0-flash as it was the last tested. You can try "gemini-pro" again
         # or another supported model if needed.
-        llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", google_api_key=os.getenv("GOOGLE_API_KEY"))
+        llm = ChatGoogleGenerativeAI(model="gemini-3.5-flash", google_api_key=os.getenv("GOOGLE_API_KEY"))
         
         # Combine the prompts correctly using from_messages
         qa_chain = ConversationalRetrievalChain.from_llm(
