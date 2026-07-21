@@ -224,7 +224,15 @@ def main():
                 try:
                     transcript = whisper_transcribe()
                     if transcript and transcript.strip():
-                        send_query(transcript.strip())
+                        # Provide immediate feedback
+                        st.chat_message("user", avatar="🧑").write(transcript.strip())
+                        with st.chat_message("assistant", avatar="🤖"):
+                            with st.spinner("Thinking..."):
+                                try:
+                                    send_query(transcript.strip())
+                                except Exception as e:
+                                    st.error(f"I encountered an error connecting to my brain: {e}")
+                                    st.stop()
                         st.rerun()
                     else:
                         st.warning("No speech detected. Try again.")
@@ -233,7 +241,15 @@ def main():
 
     # Chat input (native Streamlit)
     if prompt := st.chat_input("Ask me anything..."):
-        send_query(prompt)
+        # Provide immediate feedback
+        st.chat_message("user", avatar="🧑").write(prompt)
+        with st.chat_message("assistant", avatar="🤖"):
+            with st.spinner("Thinking..."):
+                try:
+                    send_query(prompt)
+                except Exception as e:
+                    st.error(f"I encountered an error connecting to my brain: {e}")
+                    st.stop()
         st.rerun()
 
 
