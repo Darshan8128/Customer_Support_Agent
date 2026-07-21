@@ -22,6 +22,23 @@ except Exception:
     GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
     ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY")
 
+LANGUAGES = {
+    "🌐 Auto-Detect": "auto",
+    "🇺🇸 English": "en",
+    "🇪🇸 Spanish": "es",
+    "🇫🇷 French": "fr",
+    "🇩🇪 German": "de",
+    "🇮🇳 Hindi": "hi",
+    "🇮🇳 Gujarati": "gu",
+    "🇮🇳 Marathi": "mr",
+    "🇮🇳 Tamil": "ta",
+    "🇮🇳 Telugu": "te",
+    "🇮🇳 Bengali": "bn",
+    "🇨🇳 Chinese": "zh-cn",
+    "🇯🇵 Japanese": "ja",
+    "🇦🇪 Arabic": "ar",
+}
+
 VECTOR_STORE_DIR = "vectorstore"
 VECTOR_STORE_PATH = os.path.join(VECTOR_STORE_DIR, "company_vectorstore")
 os.makedirs(VECTOR_STORE_DIR, exist_ok=True)
@@ -83,7 +100,13 @@ def send_query(query, enable_voice=False):
         session_id=st.session_state.session_id, role="user", content=query
     )
 
-    language_code = detect_language(query)
+    selected_lang = st.session_state.get("selected_language", "🌐 Auto-Detect")
+    lang_code = LANGUAGES.get(selected_lang, "auto")
+    if lang_code == "auto":
+        language_code = detect_language(query)
+    else:
+        language_code = lang_code
+
     st.session_state.language_code = language_code
 
     # Get agent response
@@ -170,6 +193,16 @@ def main():
     with st.sidebar:
         st.markdown("### 🤖 Customer Assistant")
         st.caption("AI-powered customer support")
+
+        st.divider()
+
+        st.markdown("**🌐 Response Language**")
+        st.selectbox(
+            "Language",
+            options=list(LANGUAGES.keys()),
+            key="selected_language",
+            label_visibility="collapsed",
+        )
 
         st.divider()
 
