@@ -15,8 +15,12 @@ import database
 
 load_dotenv(override=True)
 
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
-ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY")
+try:
+    GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY") or st.secrets.get("GOOGLE_API_KEY")
+    ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY") or st.secrets.get("ELEVENLABS_API_KEY")
+except Exception:
+    GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+    ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY")
 
 VECTOR_STORE_DIR = "vectorstore"
 VECTOR_STORE_PATH = os.path.join(VECTOR_STORE_DIR, "company_vectorstore")

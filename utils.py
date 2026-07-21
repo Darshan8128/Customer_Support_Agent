@@ -36,8 +36,12 @@ import fitz
 
 # Load environment variables (ensure .env file is present)
 load_dotenv(override=True)
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
-ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY")
+try:
+    GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY") or st.secrets.get("GOOGLE_API_KEY")
+    ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY") or st.secrets.get("ELEVENLABS_API_KEY")
+except Exception:
+    GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+    ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY")
 
 # Define paths for persistent storage
 VECTOR_STORE_DIR = "vectorstore"

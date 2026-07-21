@@ -28,7 +28,11 @@ from utils import load_vectorstore
 import database
 
 load_dotenv(override=True)
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+try:
+    import streamlit as st
+    GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY") or st.secrets.get("GOOGLE_API_KEY")
+except Exception:
+    GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
 
 # ============================================================
