@@ -259,9 +259,22 @@ def main():
     # Display chat
     display_chat_messages()
 
-    # Voice input (browser-native recording inline next to submit button)
+    # Chat input (native Streamlit)
+    if prompt := st.chat_input("Ask me anything..."):
+        # Provide immediate feedback
+        st.chat_message("user", avatar="🧑").write(prompt)
+        with st.chat_message("assistant", avatar="🤖"):
+            with st.spinner("Thinking..."):
+                try:
+                    send_query(prompt)
+                except Exception as e:
+                    st.error(f"I encountered an error connecting to my brain: {e}")
+                    st.stop()
+        st.rerun()
+
+    # Voice input (browser microphone — overlaid inline on chat bar via CSS)
     try:
-        recorded_audio = st.audio_input("Voice Input", label_visibility="collapsed")
+        recorded_audio = st.audio_input("Voice", label_visibility="collapsed")
         if recorded_audio:
             audio_bytes = recorded_audio.getvalue()
             audio_hash = hash(audio_bytes)
@@ -283,19 +296,6 @@ def main():
                         st.warning("No speech detected. Try again.")
     except Exception:
         pass
-
-    # Chat input (native Streamlit)
-    if prompt := st.chat_input("Ask me anything..."):
-        # Provide immediate feedback
-        st.chat_message("user", avatar="🧑").write(prompt)
-        with st.chat_message("assistant", avatar="🤖"):
-            with st.spinner("Thinking..."):
-                try:
-                    send_query(prompt)
-                except Exception as e:
-                    st.error(f"I encountered an error connecting to my brain: {e}")
-                    st.stop()
-        st.rerun()
 
 
 if __name__ == "__main__":

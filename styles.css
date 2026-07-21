@@ -1,4 +1,4 @@
-/* Date AI Chatbot - Minimal Style Overrides */
+/* Date AI Chatbot - Style Overrides */
 header[data-testid="stHeader"] {display: none;}
 footer {display: none;}
 #MainMenu {display: none;}
@@ -6,47 +6,90 @@ footer {display: none;}
 [data-testid="stChatMessage"] {border-radius: 12px; margin-bottom: 8px;}
 div.stButton > button[kind="primary"] {background: linear-gradient(135deg, #6366f1, #8b5cf6); border: none;}
 
-/* Modern Chat Input Box styling to match target design */
-div[data-testid="stChatInput"] {
-    border-radius: 28px !important;
-    background-color: #1e222d !important;
-    border: 1px solid rgba(255, 255, 255, 0.12) !important;
-    padding-right: 110px !important;
-}
+/* ── Chat Input Bar ─────────────────────────────────── */
 
-/* Blue circular send button with arrow */
+/* Blue circular send button */
 button[data-testid="stChatInputSubmitButton"] {
     background-color: #0084ff !important;
     color: #ffffff !important;
     border-radius: 50% !important;
     width: 36px !important;
     height: 36px !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
     border: none !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
 }
+button[data-testid="stChatInputSubmitButton"] svg {
+    fill: #ffffff !important;
+}
 
-/* Inline Microphone widget positioned directly to the left of the send button */
+/* ── Inline Microphone ──────────────────────────────── */
+/* Hide the entire default audio_input chrome and only show the record button */
 div[data-testid="stAudioInput"] {
     position: fixed !important;
-    bottom: 24px !important;
-    right: 95px !important;
-    z-index: 999999 !important;
-    width: auto !important;
+    bottom: 14px !important;
+    right: 68px !important;
+    z-index: 999 !important;
+    width: 42px !important;
+    height: 42px !important;
+    overflow: hidden !important;
     background: transparent !important;
     border: none !important;
     margin: 0 !important;
     padding: 0 !important;
+    box-shadow: none !important;
 }
 
-div[data-testid="stAudioInput"] label {
+/* Hide the label */
+div[data-testid="stAudioInput"] label,
+div[data-testid="stAudioInput"] > label {
     display: none !important;
 }
 
+/* Hide the full player bar but keep the record button */
 div[data-testid="stAudioInput"] > div {
     background: transparent !important;
     border: none !important;
     box-shadow: none !important;
     padding: 0 !important;
+    margin: 0 !important;
+    width: 42px !important;
+    height: 42px !important;
+    overflow: hidden !important;
+}
+
+/* Style the record/mic button itself */
+div[data-testid="stAudioInput"] button {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    color: rgba(255,255,255,0.6) !important;
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px !important;
+    min-height: 38px !important;
+    padding: 4px !important;
+    border-radius: 50% !important;
+    cursor: pointer !important;
+    transition: color 0.2s, background 0.2s !important;
+}
+div[data-testid="stAudioInput"] button:hover {
+    color: #ffffff !important;
+    background: rgba(255,255,255,0.08) !important;
+}
+
+/* When recording, turn mic red */
+div[data-testid="stAudioInput"] button[aria-pressed="true"],
+div[data-testid="stAudioInput"] button:active {
+    color: #ff4444 !important;
+    background: rgba(255,68,68,0.15) !important;
+}
+
+/* Hide any extra audio player elements (waveform, timer text) when not recording */
+div[data-testid="stAudioInput"] audio,
+div[data-testid="stAudioInput"] [data-testid="stAudioInputWaveform"] {
+    display: none !important;
 }
