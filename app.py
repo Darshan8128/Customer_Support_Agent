@@ -272,14 +272,20 @@ def main():
                     st.stop()
         st.rerun()
 
-    # Voice input (browser microphone)
+    # Voice input (browser microphone with dynamic key reset for multi-use)
     try:
-        recorded_audio = st.audio_input("Voice", label_visibility="collapsed")
+        audio_key_counter = st.session_state.get("audio_key_counter", 0)
+        recorded_audio = st.audio_input(
+            "Voice",
+            label_visibility="collapsed",
+            key=f"audio_input_{audio_key_counter}"
+        )
         if recorded_audio:
             audio_bytes = recorded_audio.getvalue()
             audio_hash = hash(audio_bytes)
             if st.session_state.get("last_processed_audio_hash") != audio_hash:
                 st.session_state["last_processed_audio_hash"] = audio_hash
+                st.session_state["audio_key_counter"] = audio_key_counter + 1
                 with st.spinner("🎙️ Transcribing audio..."):
                     transcript = transcribe_audio_bytes(audio_bytes)
                     if transcript and transcript.strip():
@@ -297,25 +303,25 @@ def main():
     except Exception:
         pass
 
-    # JS injection: proxy mic button that sits left of send button and clicks the real hidden mic
+    # JS injection: proxy mic button that sits left of send button and dynamically triggers live stAudioInput
     import streamlit.components.v1 as components
     components.html("""
     <script>
     (function proxyMic() {
         var MIC_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.93V20H9v2h6v-2h-2v-2.07A7 7 0 0 0 19 11h-2z"/></svg>';
-        var STOP_SVG  = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>';
+        var STOP_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>';
 
         function setup() {
             var doc = window.parent.document;
             var sendBtn = doc.querySelector('button[data-testid="stChatInputSubmitButton"]');
             var audioWrap = doc.querySelector('[data-testid="stAudioInput"]');
 
-            if (!sendBtn || !audioWrap) { setTimeout(setup, 300); return; }
+            if (!sendBtn || !audioWrap) {
+                setTimeout(setup, 300);
+                return;
+            }
 
-            // Already added?
-            if (doc.getElementById('__proxy_mic__')) return;
-
-            // Hide the real stAudioInput widget completely but keep it functional
+            // Always hide the current live stAudioInput element
             audioWrap.style.cssText = [
                 'position:fixed',
                 'top:-9999px',
@@ -328,18 +334,12 @@ def main():
                 'z-index:-1'
             ].join(';');
 
-            // Create a visible proxy mic button
-            var proxy = doc.createElement('button');
-            proxy.id = '__proxy_mic__';
-            proxy.title = 'Voice input';
-            proxy.innerHTML = MIC_SVG;
-            proxy.setAttribute('aria-label', 'Start voice recording');
-
-            var isRecording = false;
+            var proxy = doc.getElementById('__proxy_mic__');
 
             function applyStyle(recording) {
+                if (!proxy) return;
                 proxy.style.cssText = [
-                    'background:' + (recording ? 'rgba(255,59,48,0.12)' : 'transparent'),
+                    'background:' + (recording ? 'rgba(255,59,48,0.15)' : 'transparent'),
                     'border:none',
                     'box-shadow:none',
                     'color:' + (recording ? '#ff3b30' : 'rgba(255,255,255,0.65)'),
@@ -358,40 +358,54 @@ def main():
                     'transition:color 0.18s,background 0.18s',
                 ].join(';');
             }
+
+            if (!proxy) {
+                proxy = doc.createElement('button');
+                proxy.id = '__proxy_mic__';
+                proxy.title = 'Voice input';
+                proxy.setAttribute('aria-label', 'Start voice recording');
+
+                proxy.onmouseenter = function() {
+                    if (proxy.dataset.recording !== 'true') {
+                        proxy.style.color = '#fff';
+                        proxy.style.background = 'rgba(255,255,255,0.09)';
+                    }
+                };
+                proxy.onmouseleave = function() {
+                    applyStyle(proxy.dataset.recording === 'true');
+                };
+
+                proxy.onclick = function() {
+                    var liveWrap = doc.querySelector('[data-testid="stAudioInput"]');
+                    if (liveWrap) {
+                        liveWrap.style.pointerEvents = 'auto';
+                        var realBtn = liveWrap.querySelector('button');
+                        if (realBtn) {
+                            realBtn.click();
+                            var currentlyRecording = proxy.dataset.recording === 'true';
+                            var nextState = !currentlyRecording;
+                            proxy.dataset.recording = nextState ? 'true' : 'false';
+                            proxy.innerHTML = nextState ? STOP_SVG : MIC_SVG;
+                            applyStyle(nextState);
+                            if (nextState) {
+                                proxy.style.animation = 'mic-pulse 1.2s ease-in-out infinite';
+                            } else {
+                                proxy.style.animation = '';
+                            }
+                        }
+                        liveWrap.style.pointerEvents = 'none';
+                    }
+                };
+
+                sendBtn.parentNode.insertBefore(proxy, sendBtn);
+            }
+
+            // Reset state on rerun / setup
+            proxy.dataset.recording = 'false';
+            proxy.innerHTML = MIC_SVG;
+            proxy.style.animation = '';
             applyStyle(false);
 
-            proxy.onmouseenter = function() {
-                if (!isRecording) {
-                    proxy.style.color = '#fff';
-                    proxy.style.background = 'rgba(255,255,255,0.09)';
-                }
-            };
-            proxy.onmouseleave = function() { applyStyle(isRecording); };
-
-            proxy.onclick = function() {
-                // Temporarily make the real mic accessible for the click
-                audioWrap.style.pointerEvents = 'auto';
-                var realBtn = audioWrap.querySelector('button');
-                if (realBtn) {
-                    realBtn.click();
-                    isRecording = !isRecording;
-                    proxy.innerHTML = isRecording ? STOP_SVG : MIC_SVG;
-                    applyStyle(isRecording);
-
-                    // Pulse animation when recording
-                    if (isRecording) {
-                        proxy.style.animation = 'mic-pulse 1.2s ease-in-out infinite';
-                    } else {
-                        proxy.style.animation = '';
-                    }
-                }
-                audioWrap.style.pointerEvents = 'none';
-            };
-
-            // Insert proxy just before the send button
-            sendBtn.parentNode.insertBefore(proxy, sendBtn);
-
-            // Inject pulse keyframe
             if (!doc.getElementById('__mic_style__')) {
                 var s = doc.createElement('style');
                 s.id = '__mic_style__';
@@ -408,4 +422,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main()
