@@ -97,6 +97,17 @@ def _retrieve_documents(query: str, k: int = 5) -> list[dict]:
     return retrieved
 
 
+def _get_content_text(content) -> str:
+    """Helper to convert LLM response.content (which can be a string or list of blocks) into plain text."""
+    if isinstance(content, list):
+        text_blocks = [
+            b["text"] if isinstance(b, dict) and "text" in b else str(b)
+            for b in content
+        ]
+        return "\n".join(text_blocks)
+    return str(content) if content is not None else ""
+
+
 def _grade_retrieval(query: str, retrieved_docs: list[dict]) -> dict:
     """
     Separate LLM call: judges whether retrieved documents are sufficient
@@ -131,16 +142,19 @@ or
 {{"verdict": "insufficient", "reason": "brief explanation"}}"""
 
     response = llm.invoke([HumanMessage(content=grading_prompt)])
+    content_str = _get_content_text(response.content)
 
     try:
-        result = json.loads(response.content.strip())
+        # Strip markdown fences if present
+        clean_json = content_str.strip().strip("```json").strip("```").strip()
+        result = json.loads(clean_json)
         if result.get("verdict") not in ("sufficient", "insufficient"):
             result["verdict"] = "sufficient"  # safe default
         return result
-    except json.JSONDecodeError:
+    except Exception:
         # Fallback: parse verdict from free text
-        content = response.content.lower()
-        if "insufficient" in content:
+        content_lower = content_str.lower()
+        if "insufficient" in content_lower:
             return {"verdict": "insufficient", "reason": "Parsed from unstructured LLM response"}
         return {"verdict": "sufficient", "reason": "Default: could not parse structured response"}
 
@@ -170,7 +184,8 @@ Rewrite the query to improve retrieval. Strategies:
 Respond with ONLY the rewritten query — no explanation, no quotes."""
 
     response = llm.invoke([HumanMessage(content=rewrite_prompt)])
-    return response.content.strip().strip('"').strip("'")
+    content_str = _get_content_text(response.content)
+    return content_str.strip().strip('"').strip("'")
 
 
 def search_knowledge_base(query: str) -> dict:
@@ -272,9 +287,10 @@ Rules:
 - If relevant, suggest the user contact support for further help"""
 
     response = llm.invoke([HumanMessage(content=answer_prompt)])
+    answer_str = _get_content_text(response.content)
 
     return {
-        "answer": response.content,
+        "answer": answer_str,
         "retrieval_attempts": retrieval_log,
         "final_verdict": "sufficient",
         "escalate": False,
