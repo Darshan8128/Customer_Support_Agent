@@ -272,7 +272,7 @@ def main():
                     st.stop()
         st.rerun()
 
-    # Voice input (native browser microphone with CSS positioning & dynamic key reset for multi-use)
+    # Voice input (native browser microphone with dynamic key reset for multi-use)
     try:
         audio_key_counter = st.session_state.get("audio_key_counter", 0)
         recorded_audio = st.audio_input(
@@ -303,7 +303,116 @@ def main():
     except Exception:
         pass
 
+    # JS injection: Proxy mic button inside chat bar (left of blue send button) with auto re-attachment
+    import streamlit.components.v1 as components
+    components.html("""
+    <script>
+    (function proxyMic() {
+        var MIC_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.93V20H9v2h6v-2h-2v-2.07A7 7 0 0 0 19 11h-2z"/></svg>';
+        var STOP_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>';
+
+        function setup() {
+            var doc = window.parent.document;
+            var sendBtn = doc.querySelector('button[data-testid="stChatInputSubmitButton"]');
+            var audioWrap = doc.querySelector('[data-testid="stAudioInput"]');
+
+            if (!sendBtn || !audioWrap) return;
+
+            // Hide real audioWrap off-screen
+            audioWrap.style.cssText = 'position:fixed!important; top:-9999px!important; left:-9999px!important; width:1px!important; height:1px!important; opacity:0!important; pointer-events:none!important; z-index:-1!important;';
+
+            var proxy = doc.getElementById('__proxy_mic__');
+            if (proxy && (!sendBtn.parentNode || !sendBtn.parentNode.contains(proxy))) {
+                proxy.remove();
+                proxy = null;
+            }
+
+            function applyStyle(recording) {
+                if (!proxy) return;
+                proxy.style.cssText = [
+                    'background:' + (recording ? 'rgba(255,59,48,0.18)' : 'transparent'),
+                    'border:none',
+                    'box-shadow:none',
+                    'color:' + (recording ? '#ff3b30' : 'rgba(255,255,255,0.7)'),
+                    'cursor:pointer',
+                    'width:36px',
+                    'height:36px',
+                    'min-width:36px',
+                    'min-height:36px',
+                    'padding:6px',
+                    'border-radius:50%',
+                    'display:flex',
+                    'align-items:center',
+                    'justify-content:center',
+                    'margin-right:6px',
+                    'flex-shrink:0',
+                    'transition:all 0.18s ease',
+                ].join(';');
+            }
+
+            if (!proxy) {
+                proxy = doc.createElement('button');
+                proxy.id = '__proxy_mic__';
+                proxy.title = 'Record Voice Message';
+                proxy.setAttribute('type', 'button');
+                proxy.setAttribute('aria-label', 'Record Voice Message');
+
+                proxy.onmouseenter = function() {
+                    if (proxy.dataset.recording !== 'true') {
+                        proxy.style.color = '#ffffff';
+                        proxy.style.background = 'rgba(255,255,255,0.1)';
+                    }
+                };
+                proxy.onmouseleave = function() {
+                    applyStyle(proxy.dataset.recording === 'true');
+                };
+
+                proxy.onclick = function(e) {
+                    if (e) { e.preventDefault(); e.stopPropagation(); }
+                    var liveWrap = doc.querySelector('[data-testid="stAudioInput"]');
+                    if (liveWrap) {
+                        liveWrap.style.pointerEvents = 'auto';
+                        var realBtn = liveWrap.querySelector('button');
+                        if (realBtn) {
+                            realBtn.click();
+                            var currentlyRec = proxy.dataset.recording === 'true';
+                            var nextState = !currentlyRec;
+                            proxy.dataset.recording = nextState ? 'true' : 'false';
+                            proxy.innerHTML = nextState ? STOP_SVG : MIC_SVG;
+                            applyStyle(nextState);
+                            if (nextState) {
+                                proxy.style.animation = 'mic-pulse 1.2s ease-in-out infinite';
+                            } else {
+                                proxy.style.animation = '';
+                            }
+                        }
+                        liveWrap.style.pointerEvents = 'none';
+                    }
+                };
+
+                sendBtn.parentNode.insertBefore(proxy, sendBtn);
+                proxy.dataset.recording = 'false';
+                proxy.innerHTML = MIC_SVG;
+                proxy.style.animation = '';
+                applyStyle(false);
+            }
+
+            if (!doc.getElementById('__mic_style__')) {
+                var s = doc.createElement('style');
+                s.id = '__mic_style__';
+                s.textContent = '@keyframes mic-pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,59,48,0.45)}50%{box-shadow:0 0 0 7px rgba(255,59,48,0)}}';
+                doc.head.appendChild(s);
+            }
+        }
+
+        setup();
+        setInterval(setup, 400);
+    })();
+    </script>
+    """, height=0)
+
 
 if __name__ == "__main__":
     main()
+
 
