@@ -259,53 +259,30 @@ def main():
     # Display chat
     display_chat_messages()
 
-    # Voice input (browser-native recording aligned on the right side)
-    _, col_mic = st.columns([2, 1])
-    with col_mic:
-        try:
-            recorded_audio = st.audio_input("🎤 Record Voice Message")
-            if recorded_audio:
-                audio_bytes = recorded_audio.getvalue()
-                audio_hash = hash(audio_bytes)
-                if st.session_state.get("last_processed_audio_hash") != audio_hash:
-                    st.session_state["last_processed_audio_hash"] = audio_hash
-                    with st.spinner("🎙️ Transcribing audio..."):
-                        transcript = transcribe_audio_bytes(audio_bytes)
-                        if transcript and transcript.strip():
-                            st.chat_message("user", avatar="🧑").write(transcript.strip())
-                            with st.chat_message("assistant", avatar="🤖"):
-                                with st.spinner("Thinking..."):
-                                    try:
-                                        send_query(transcript.strip())
-                                    except Exception as e:
-                                        st.error(f"I encountered an error connecting to my brain: {e}")
-                                        st.stop()
-                            st.rerun()
-                        else:
-                            st.warning("No speech detected. Try again.")
-        except Exception:
-            pass
-        # Fallback to server button if audio_input not supported
-        col_voice, _ = st.columns([1, 5])
-        with col_voice:
-            if st.button("🎤 Voice Input", use_container_width=True):
-                with st.spinner("🎙️ Listening..."):
-                    try:
-                        transcript = whisper_transcribe()
-                        if transcript and transcript.strip():
-                            st.chat_message("user", avatar="🧑").write(transcript.strip())
-                            with st.chat_message("assistant", avatar="🤖"):
-                                with st.spinner("Thinking..."):
-                                    try:
-                                        send_query(transcript.strip(), enable_voice=True)
-                                    except Exception as e:
-                                        st.error(f"I encountered an error connecting to my brain: {e}")
-                                        st.stop()
-                            st.rerun()
-                        else:
-                            st.warning("No speech detected. Try again.")
-                    except Exception as e:
-                        st.error(f"Voice input error: {e}")
+    # Voice input (browser-native recording inline next to submit button)
+    try:
+        recorded_audio = st.audio_input("Voice Input", label_visibility="collapsed")
+        if recorded_audio:
+            audio_bytes = recorded_audio.getvalue()
+            audio_hash = hash(audio_bytes)
+            if st.session_state.get("last_processed_audio_hash") != audio_hash:
+                st.session_state["last_processed_audio_hash"] = audio_hash
+                with st.spinner("🎙️ Transcribing audio..."):
+                    transcript = transcribe_audio_bytes(audio_bytes)
+                    if transcript and transcript.strip():
+                        st.chat_message("user", avatar="🧑").write(transcript.strip())
+                        with st.chat_message("assistant", avatar="🤖"):
+                            with st.spinner("Thinking..."):
+                                try:
+                                    send_query(transcript.strip())
+                                except Exception as e:
+                                    st.error(f"I encountered an error connecting to my brain: {e}")
+                                    st.stop()
+                        st.rerun()
+                    else:
+                        st.warning("No speech detected. Try again.")
+    except Exception:
+        pass
 
     # Chat input (native Streamlit)
     if prompt := st.chat_input("Ask me anything..."):

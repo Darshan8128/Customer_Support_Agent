@@ -5,3 +5,48 @@ footer {display: none;}
 [data-testid="stSidebar"] {border-right: 1px solid rgba(99,102,241,0.2);}
 [data-testid="stChatMessage"] {border-radius: 12px; margin-bottom: 8px;}
 div.stButton > button[kind="primary"] {background: linear-gradient(135deg, #6366f1, #8b5cf6); border: none;}
+
+/* Modern Chat Input Box styling to match target design */
+div[data-testid="stChatInput"] {
+    border-radius: 28px !important;
+    background-color: #1e222d !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    padding-right: 110px !important;
+}
+
+/* Blue circular send button with arrow */
+button[data-testid="stChatInputSubmitButton"] {
+    background-color: #0084ff !important;
+    color: #ffffff !important;
+    border-radius: 50% !important;
+    width: 36px !important;
+    height: 36px !important;
+    border: none !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* Inline Microphone widget positioned directly to the left of the send button */
+div[data-testid="stAudioInput"] {
+    position: fixed !important;
+    bottom: 24px !important;
+    right: 95px !important;
+    z-index: 999999 !important;
+    width: auto !important;
+    background: transparent !important;
+    border: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+div[data-testid="stAudioInput"] label {
+    display: none !important;
+}
+
+div[data-testid="stAudioInput"] > div {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+}
