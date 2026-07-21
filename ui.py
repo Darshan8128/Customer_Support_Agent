@@ -16,6 +16,56 @@ def setup_ui():
         with open(css_path, "r", encoding="utf-8") as f:
             st.markdown("<style>" + f.read() + "</style>", unsafe_allow_html=True)
 
+    # Inject JS to move the audio_input record button into the chat bar
+    st.markdown("""
+    <script>
+    (function moveMicIntoBar() {
+        function tryMove() {
+            // Find the record button inside stAudioInput
+            const audioInput = document.querySelector('[data-testid="stAudioInput"]');
+            const chatInputRow = document.querySelector('[data-testid="stChatInputContainer"] > div');
+            const sendBtn = document.querySelector('[data-testid="stChatInputSubmitButton"]');
+
+            if (audioInput && sendBtn && chatInputRow) {
+                const recordBtn = audioInput.querySelector('button');
+                if (recordBtn && !document.getElementById('__mic_btn_injected__')) {
+                    recordBtn.id = '__mic_btn_injected__';
+                    recordBtn.title = 'Voice input';
+                    // Style the moved button
+                    Object.assign(recordBtn.style, {
+                        background: 'transparent',
+                        border: 'none',
+                        color: 'rgba(255,255,255,0.6)',
+                        cursor: 'pointer',
+                        width: '36px',
+                        height: '36px',
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: '4px',
+                        marginRight: '4px',
+                        flexShrink: '0',
+                    });
+                    // Insert before the send button
+                    sendBtn.parentNode.insertBefore(recordBtn, sendBtn);
+                    // Hide the original container
+                    audioInput.style.display = 'none';
+                }
+            } else {
+                // DOM not ready yet, retry
+                setTimeout(tryMove, 200);
+            }
+        }
+        // Run after page load and on any Streamlit reruns
+        if (document.readyState === 'complete') { tryMove(); }
+        else { window.addEventListener('load', tryMove); }
+        // Also observe DOM mutations for Streamlit reruns
+        new MutationObserver(tryMove).observe(document.body, {childList: true, subtree: true});
+    })();
+    </script>
+    """, unsafe_allow_html=True)
+
 
 def render_admin_panel(reset_chat, remove_file, extract_text_from_file):
     pass

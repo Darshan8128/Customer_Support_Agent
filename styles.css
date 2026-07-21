@@ -6,17 +6,16 @@ footer {display: none;}
 [data-testid="stChatMessage"] {border-radius: 12px; margin-bottom: 8px;}
 div.stButton > button[kind="primary"] {background: linear-gradient(135deg, #6366f1, #8b5cf6); border: none;}
 
-/* ── Chat Input Bar ─────────────────────────────────── */
-
-/* Blue circular send button */
+/* ── Blue circular send button ──────────────────────── */
 button[data-testid="stChatInputSubmitButton"] {
     background-color: #0084ff !important;
     color: #ffffff !important;
     border-radius: 50% !important;
-    width: 36px !important;
-    height: 36px !important;
-    min-width: 36px !important;
-    min-height: 36px !important;
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px !important;
+    min-height: 38px !important;
+    padding: 0 !important;
     border: none !important;
     display: flex !important;
     align-items: center !important;
@@ -26,15 +25,15 @@ button[data-testid="stChatInputSubmitButton"] svg {
     fill: #ffffff !important;
 }
 
-/* ── Inline Microphone ──────────────────────────────── */
-/* Hide the entire default audio_input chrome and only show the record button */
+/* ── Microphone widget: collapse to icon only ─────── */
+/* Position it fixed, just to the LEFT of the send button */
 div[data-testid="stAudioInput"] {
     position: fixed !important;
-    bottom: 14px !important;
-    right: 68px !important;
-    z-index: 999 !important;
-    width: 42px !important;
-    height: 42px !important;
+    bottom: 12px !important;
+    right: 62px !important;   /* send button is ~14px from right + 38px wide + 10px gap */
+    z-index: 9999 !important;
+    width: 36px !important;
+    height: 36px !important;
     overflow: hidden !important;
     background: transparent !important;
     border: none !important;
@@ -44,52 +43,73 @@ div[data-testid="stAudioInput"] {
 }
 
 /* Hide the label */
-div[data-testid="stAudioInput"] label,
-div[data-testid="stAudioInput"] > label {
+div[data-testid="stAudioInput"] label {
     display: none !important;
 }
 
-/* Hide the full player bar but keep the record button */
+/* Shrink inner container */
 div[data-testid="stAudioInput"] > div {
     background: transparent !important;
     border: none !important;
     box-shadow: none !important;
     padding: 0 !important;
     margin: 0 !important;
-    width: 42px !important;
-    height: 42px !important;
+    width: 36px !important;
+    height: 36px !important;
     overflow: hidden !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
 }
 
-/* Style the record/mic button itself */
+/* Style the mic button */
 div[data-testid="stAudioInput"] button {
     background: transparent !important;
     border: none !important;
     box-shadow: none !important;
     color: rgba(255,255,255,0.6) !important;
-    width: 38px !important;
-    height: 38px !important;
-    min-width: 38px !important;
-    min-height: 38px !important;
-    padding: 4px !important;
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
+    padding: 6px !important;
     border-radius: 50% !important;
     cursor: pointer !important;
-    transition: color 0.2s, background 0.2s !important;
+    transition: color 0.2s ease, background 0.2s ease !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
 }
+
+div[data-testid="stAudioInput"] button svg {
+    width: 20px !important;
+    height: 20px !important;
+}
+
 div[data-testid="stAudioInput"] button:hover {
-    color: #ffffff !important;
-    background: rgba(255,255,255,0.08) !important;
+    color: rgba(255,255,255,0.95) !important;
+    background: rgba(255,255,255,0.1) !important;
 }
 
-/* When recording, turn mic red */
+/* Red when recording */
 div[data-testid="stAudioInput"] button[aria-pressed="true"],
-div[data-testid="stAudioInput"] button:active {
-    color: #ff4444 !important;
-    background: rgba(255,68,68,0.15) !important;
+div[data-testid="stAudioInput"] button[aria-label*="Stop"],
+div[data-testid="stAudioInput"] button[title*="Stop"] {
+    color: #ff3b30 !important;
+    background: rgba(255, 59, 48, 0.12) !important;
+    animation: pulse-mic 1.2s ease-in-out infinite !important;
 }
 
-/* Hide any extra audio player elements (waveform, timer text) when not recording */
+@keyframes pulse-mic {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(255,59,48,0.4); }
+    50%       { box-shadow: 0 0 0 6px rgba(255,59,48,0); }
+}
+
+/* Hide waveform, timer, audio player — keep only the mic button */
 div[data-testid="stAudioInput"] audio,
-div[data-testid="stAudioInput"] [data-testid="stAudioInputWaveform"] {
+div[data-testid="stAudioInput"] [class*="waveform"],
+div[data-testid="stAudioInput"] [class*="timer"],
+div[data-testid="stAudioInput"] [class*="Wave"],
+div[data-testid="stAudioInput"] [class*="Time"] {
     display: none !important;
 }
