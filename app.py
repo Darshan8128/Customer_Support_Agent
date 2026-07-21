@@ -272,7 +272,7 @@ def main():
                     st.stop()
         st.rerun()
 
-    # Voice input (browser microphone — overlaid inline on chat bar via CSS)
+    # Voice input (browser microphone)
     try:
         recorded_audio = st.audio_input("Voice", label_visibility="collapsed")
         if recorded_audio:
@@ -296,6 +296,72 @@ def main():
                         st.warning("No speech detected. Try again.")
     except Exception:
         pass
+
+    # JS injection: move mic button from hidden stAudioInput into the chat bar (left of send button)
+    import streamlit.components.v1 as components
+    components.html("""
+    <script>
+    (function moveMic() {
+        function inject() {
+            // Walk up from shadow/iframe into the parent document
+            const doc = window.parent.document;
+
+            const audioWrap = doc.querySelector('[data-testid="stAudioInput"]');
+            const sendBtn   = doc.querySelector('button[data-testid="stChatInputSubmitButton"]');
+
+            if (!audioWrap || !sendBtn) { setTimeout(inject, 300); return; }
+
+            const micBtn = audioWrap.querySelector('button');
+            if (!micBtn) { setTimeout(inject, 300); return; }
+
+            // Already injected?
+            if (doc.getElementById('__ag_mic_btn__')) return;
+
+            micBtn.id = '__ag_mic_btn__';
+
+            // Style it to look like a clean mic icon button
+            Object.assign(micBtn.style, {
+                background: 'transparent',
+                border: 'none',
+                boxShadow: 'none',
+                color: 'rgba(255,255,255,0.65)',
+                cursor: 'pointer',
+                width: '38px',
+                height: '38px',
+                minWidth: '38px',
+                minHeight: '38px',
+                padding: '7px',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginRight: '4px',
+                flexShrink: '0',
+                transition: 'color 0.18s, background 0.18s',
+            });
+
+            micBtn.onmouseenter = () => {
+                micBtn.style.color = '#fff';
+                micBtn.style.background = 'rgba(255,255,255,0.09)';
+            };
+            micBtn.onmouseleave = () => {
+                micBtn.style.color = 'rgba(255,255,255,0.65)';
+                micBtn.style.background = 'transparent';
+            };
+
+            // Insert the button just before the send button
+            sendBtn.parentNode.insertBefore(micBtn, sendBtn);
+
+            // Completely hide the original stAudioInput container
+            audioWrap.style.cssText = 'display:none!important;visibility:hidden!important;height:0!important;';
+        }
+
+        if (document.readyState === 'complete') inject();
+        else window.addEventListener('load', inject);
+    })();
+    </script>
+    """, height=0)
+
 
 
 if __name__ == "__main__":
