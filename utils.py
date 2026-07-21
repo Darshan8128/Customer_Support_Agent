@@ -2,6 +2,7 @@ import os
 import tempfile
 import streamlit as st
 from dotenv import load_dotenv
+from config import GEMINI_MODEL, EMBEDDING_MODEL
 
 # Import Gemini components for LLM and Embeddings
 from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
@@ -68,7 +69,7 @@ def load_vectorstore():
         if not GOOGLE_API_KEY:
             st.error("Google API Key not found. Please set GOOGLE_API_KEY in your .env file.")
             return None
-        embeddings = GoogleGenerativeAIEmbeddings(model="models/gemini-embedding-2", google_api_key=GOOGLE_API_KEY)
+        embeddings = GoogleGenerativeAIEmbeddings(model=EMBEDDING_MODEL, google_api_key=GOOGLE_API_KEY)
     except Exception as e:
         st.error(f"ERROR: Failed to initialize GoogleGenerativeAIEmbeddings. Check GOOGLE_API_KEY. Details: {e}")
         return None
@@ -342,7 +343,7 @@ def get_ai_response(query, lang="en"):
         # Initialize Gemini Chat
         # Using gemini-1.0-flash as it was the last tested. You can try "gemini-pro" again
         # or another supported model if needed.
-        llm = ChatGoogleGenerativeAI(model="gemini-3.6-flash", google_api_key=os.getenv("GOOGLE_API_KEY"))
+        llm = ChatGoogleGenerativeAI(model=GEMINI_MODEL, google_api_key=os.getenv("GOOGLE_API_KEY"))
         
         # Combine the prompts correctly using from_messages
         qa_chain = ConversationalRetrievalChain.from_llm(

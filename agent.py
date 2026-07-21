@@ -26,6 +26,7 @@ from deep_translator import GoogleTranslator
 
 from utils import load_vectorstore
 import database
+from config import GEMINI_MODEL
 
 load_dotenv(override=True)
 try:
@@ -36,13 +37,13 @@ except Exception:
 
 
 # ============================================================
-# Shared LLM factory — same model/key as utils.py
+# Shared LLM factory — uses central config.py
 # ============================================================
 
 def _get_llm(temperature: float = 0.3) -> ChatGoogleGenerativeAI:
-    """Returns a ChatGoogleGenerativeAI instance matching the existing utils.py config."""
+    """Returns a ChatGoogleGenerativeAI instance matching the central config.py."""
     return ChatGoogleGenerativeAI(
-        model="gemini-3.6-flash",
+        model=GEMINI_MODEL,
         google_api_key=GOOGLE_API_KEY,
         temperature=temperature,
     )
