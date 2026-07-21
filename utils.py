@@ -34,6 +34,12 @@ except ImportError:
 from scipy.io.wavfile import write
 import fitz
 
+try:
+    from gtts import gTTS
+except ImportError:
+    gTTS = None
+
+
 # Load environment variables (ensure .env file is present)
 load_dotenv(override=True)
 try:
@@ -215,9 +221,71 @@ def elevenlabs_tts(text, lang="en", voice_name="Rachel"):
 
         return temp_audio_file
     except Exception as e:
-        st.error(f"Error generating speech with ElevenLabs: {e}")
-        st.error("Please check your ElevenLabs API key, account balance/limits, and internet connection.")
+        st.error(f"ElevenLabs TTS error: {e}")
         return None
+
+def transcribe_audio_bytes(audio_bytes):
+    """
+    Transcribes raw audio bytes (e.g. from browser microphone via st.audio_input or file upload) using Whisper.
+    """
+    if whisper is None:
+        st.error("Whisper package is not installed or supported.")
+        return ""
+
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as temp_file:
+        temp_file.write(audio_bytes)
+        audio_filepath = temp_file.name
+
+    try:
+        model = whisper.load_model("base")
+        result = model.transcribe(audio_filepath)
+        return result.get("text", "").strip()
+    except Exception as e:
+        st.error(f"Error during audio transcription: {e}")
+        return ""
+    finally:
+        try:
+            os.remove(audio_filepath)
+        except Exception:
+            pass
+
+
+def generate_tts(text, lang="en"):
+    """
+    Generates text-to-speech audio for a response.
+    First tries ElevenLabs (if key is available), then falls back to gTTS (100% free, no key needed).
+    Returns path to temporary MP3 file, or None.
+    """
+    if not text or not text.strip():
+        return None
+
+    # Try ElevenLabs first if key is available
+    if ELEVENLABS_API_KEY:
+        try:
+            audio_path = elevenlabs_tts(text, lang=lang)
+            if audio_path:
+                return audio_path
+        except Exception as e:
+            print(f"ElevenLabs TTS failed: {e}")
+
+    # Fallback to gTTS
+    if gTTS is not None:
+        try:
+            lang_map = {
+                "zh-cn": "zh-CN",
+                "auto": "en"
+            }
+            gtts_lang = lang_map.get(lang.lower(), lang[:2].lower())
+            tts = gTTS(text=text[:800], lang=gtts_lang, slow=False)
+            temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
+            tts.save(temp_file.name)
+            temp_file.close()
+            return temp_file.name
+        except Exception as e:
+            print(f"gTTS error: {e}")
+
+    return None
+
 
 def extract_text_from_file(uploaded_file):
     """

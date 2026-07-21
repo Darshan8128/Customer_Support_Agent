@@ -9,6 +9,8 @@ from utils import (
     extract_text_from_file,
     whisper_transcribe,
     elevenlabs_tts,
+    generate_tts,
+    transcribe_audio_bytes,
 )
 from agent import get_agent_response
 import database
@@ -90,7 +92,7 @@ def detect_language(text):
         return "en"
 
 
-def send_query(query, enable_voice=False):
+def send_query(query, enable_voice=True):
     if not query.strip():
         return
 
@@ -116,8 +118,8 @@ def send_query(query, enable_voice=False):
         conversation_history=st.session_state.conversation_history,
     )
     audio_file = None
-    if enable_voice and answer and ELEVENLABS_API_KEY:
-        audio_file = elevenlabs_tts(answer, lang=language_code)
+    if enable_voice and answer:
+        audio_file = generate_tts(answer, lang=language_code)
 
     # Save assistant message
     assistant_msg = {
@@ -246,31 +248,46 @@ def main():
     # Display chat
     display_chat_messages()
 
-    # Voice input (above chat bar)
-    if "voice_transcript" not in st.session_state:
-        st.session_state.voice_transcript = ""
-
-    col_voice, _ = st.columns([1, 5])
-    with col_voice:
-        if st.button("🎤 Voice Input", use_container_width=True):
-            with st.spinner("🎙️ Listening..."):
-                try:
-                    transcript = whisper_transcribe()
-                    if transcript and transcript.strip():
-                        # Provide immediate feedback
-                        st.chat_message("user", avatar="🧑").write(transcript.strip())
-                        with st.chat_message("assistant", avatar="🤖"):
-                            with st.spinner("Thinking..."):
-                                try:
-                                    send_query(transcript.strip())
-                                except Exception as e:
-                                    st.error(f"I encountered an error connecting to my brain: {e}")
-                                    st.stop()
-                        st.rerun()
-                    else:
-                        st.warning("No speech detected. Try again.")
-                except Exception as e:
-                    st.error(f"Voice input error: {e}")
+    # Voice input (browser-native recording)
+    try:
+        recorded_audio = st.audio_input("🎤 Record Voice Message")
+        if recorded_audio:
+            with st.spinner("🎙️ Transcribing audio..."):
+                transcript = transcribe_audio_bytes(recorded_audio.getvalue())
+                if transcript and transcript.strip():
+                    st.chat_message("user", avatar="🧑").write(transcript.strip())
+                    with st.chat_message("assistant", avatar="🤖"):
+                        with st.spinner("Thinking..."):
+                            try:
+                                send_query(transcript.strip(), enable_voice=True)
+                            except Exception as e:
+                                st.error(f"I encountered an error connecting to my brain: {e}")
+                                st.stop()
+                    st.rerun()
+                else:
+                    st.warning("No speech detected. Try again.")
+    except Exception:
+        # Fallback to server button if audio_input not supported
+        col_voice, _ = st.columns([1, 5])
+        with col_voice:
+            if st.button("🎤 Voice Input", use_container_width=True):
+                with st.spinner("🎙️ Listening..."):
+                    try:
+                        transcript = whisper_transcribe()
+                        if transcript and transcript.strip():
+                            st.chat_message("user", avatar="🧑").write(transcript.strip())
+                            with st.chat_message("assistant", avatar="🤖"):
+                                with st.spinner("Thinking..."):
+                                    try:
+                                        send_query(transcript.strip(), enable_voice=True)
+                                    except Exception as e:
+                                        st.error(f"I encountered an error connecting to my brain: {e}")
+                                        st.stop()
+                            st.rerun()
+                        else:
+                            st.warning("No speech detected. Try again.")
+                    except Exception as e:
+                        st.error(f"Voice input error: {e}")
 
     # Chat input (native Streamlit)
     if prompt := st.chat_input("Ask me anything..."):
