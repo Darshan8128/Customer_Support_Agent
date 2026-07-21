@@ -224,12 +224,26 @@ def elevenlabs_tts(text, lang="en", voice_name="Rachel"):
         st.error(f"ElevenLabs TTS error: {e}")
         return None
 
+@st.cache_resource
+def get_whisper_model():
+    if whisper is None:
+        return None
+    try:
+        return whisper.load_model("tiny")
+    except Exception:
+        try:
+            return whisper.load_model("base")
+        except Exception:
+            return None
+
+
 def transcribe_audio_bytes(audio_bytes):
     """
     Transcribes raw audio bytes (e.g. from browser microphone via st.audio_input or file upload) using Whisper.
     """
-    if whisper is None:
-        st.error("Whisper package is not installed or supported.")
+    model = get_whisper_model()
+    if model is None:
+        st.error("Whisper package is not installed or model loading failed.")
         return ""
 
     with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as temp_file:
@@ -237,7 +251,6 @@ def transcribe_audio_bytes(audio_bytes):
         audio_filepath = temp_file.name
 
     try:
-        model = whisper.load_model("base")
         result = model.transcribe(audio_filepath)
         return result.get("text", "").strip()
     except Exception as e:

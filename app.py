@@ -92,9 +92,12 @@ def detect_language(text):
         return "en"
 
 
-def send_query(query, enable_voice=True):
+def send_query(query, enable_voice=None):
     if not query.strip():
         return
+
+    if enable_voice is None:
+        enable_voice = st.session_state.get("enable_voice_tts", False)
 
     # Save user message
     st.session_state.chat_history.append({"role": "user", "content": query})
@@ -206,6 +209,14 @@ def main():
             label_visibility="collapsed",
         )
 
+        st.markdown("**🔊 Voice Settings**")
+        st.checkbox(
+            "Enable Voice Responses (TTS)",
+            value=False,
+            key="enable_voice_tts",
+            help="Generates audio playback for AI responses. Turn off for faster text replies."
+        )
+
         st.divider()
 
         if st.button("✨ New Chat", type="primary", use_container_width=True):
@@ -252,20 +263,24 @@ def main():
     try:
         recorded_audio = st.audio_input("🎤 Record Voice Message")
         if recorded_audio:
-            with st.spinner("🎙️ Transcribing audio..."):
-                transcript = transcribe_audio_bytes(recorded_audio.getvalue())
-                if transcript and transcript.strip():
-                    st.chat_message("user", avatar="🧑").write(transcript.strip())
-                    with st.chat_message("assistant", avatar="🤖"):
-                        with st.spinner("Thinking..."):
-                            try:
-                                send_query(transcript.strip(), enable_voice=True)
-                            except Exception as e:
-                                st.error(f"I encountered an error connecting to my brain: {e}")
-                                st.stop()
-                    st.rerun()
-                else:
-                    st.warning("No speech detected. Try again.")
+            audio_bytes = recorded_audio.getvalue()
+            audio_hash = hash(audio_bytes)
+            if st.session_state.get("last_processed_audio_hash") != audio_hash:
+                st.session_state["last_processed_audio_hash"] = audio_hash
+                with st.spinner("🎙️ Transcribing audio..."):
+                    transcript = transcribe_audio_bytes(audio_bytes)
+                    if transcript and transcript.strip():
+                        st.chat_message("user", avatar="🧑").write(transcript.strip())
+                        with st.chat_message("assistant", avatar="🤖"):
+                            with st.spinner("Thinking..."):
+                                try:
+                                    send_query(transcript.strip())
+                                except Exception as e:
+                                    st.error(f"I encountered an error connecting to my brain: {e}")
+                                    st.stop()
+                        st.rerun()
+                    else:
+                        st.warning("No speech detected. Try again.")
     except Exception:
         # Fallback to server button if audio_input not supported
         col_voice, _ = st.columns([1, 5])
