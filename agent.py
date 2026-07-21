@@ -191,112 +191,48 @@ Respond with ONLY the rewritten query — no explanation, no quotes."""
 
 def search_knowledge_base(query: str) -> dict:
     """
-    Agentic RAG loop: retrieve → grade → (rewrite → re-retrieve) → answer or escalate.
-    
-    This is NOT a simple retrieve-and-return. It self-corrects retrieval quality
-    through a grade → rewrite → retry cycle (max 2 retrieval attempts).
+    Fast, streamlined RAG retrieval from FAISS vectorstore.
     
     Args:
-        query: The user's question (already translated to English).
+        query: The user's question.
     
     Returns:
-        dict with keys:
-        - answer: str | None  — generated answer, or None if escalating
-        - retrieval_attempts: list[dict]  — log of each attempt's details
-        - final_verdict: "sufficient" | "insufficient"
-        - escalate: bool  — True means fall back to create_support_ticket
-        - escalation_reason: str | None  — why escalation is needed
+        dict with answer/context or escalation signal.
     """
-    MAX_ATTEMPTS = 2
-    retrieval_log = []
-    current_query = query
-    sufficient_docs = None
+    # FAISS similarity search (instant L2 vector distance)
+    docs = _retrieve_documents(query, k=4)
 
-    for attempt in range(1, MAX_ATTEMPTS + 1):
-        # --- Step A: Retrieve documents ---
-        docs = _retrieve_documents(current_query, k=5)
-
-        if not docs:
-            retrieval_log.append({
-                "attempt": attempt,
-                "query_used": current_query,
-                "docs_found": 0,
-                "verdict": "insufficient",
-                "reason": "No documents retrieved — vectorstore may be empty or unavailable",
-            })
-            if attempt < MAX_ATTEMPTS:
-                rewritten = _rewrite_query(query, "No documents were retrieved at all")
-                retrieval_log[-1]["rewritten_query"] = rewritten
-                current_query = rewritten
-                continue
-            else:
-                break
-
-        # --- Step B: Grade retrieval quality ---
-        grade = _grade_retrieval(current_query, docs)
-
-        retrieval_log.append({
-            "attempt": attempt,
-            "query_used": current_query,
-            "docs_found": len(docs),
-            "top_score": docs[0]["score"],
-            "verdict": grade["verdict"],
-            "reason": grade["reason"],
-        })
-
-        if grade["verdict"] == "sufficient":
-            sufficient_docs = docs
-            break
-
-        # --- Step C: Insufficient — rewrite and retry (if attempts remain) ---
-        if attempt < MAX_ATTEMPTS:
-            rewritten = _rewrite_query(query, grade["reason"])
-            retrieval_log[-1]["rewritten_query"] = rewritten
-            current_query = rewritten
-
-    # --- Step D: All attempts exhausted, still insufficient → escalation ---
-    if sufficient_docs is None:
+    if not docs:
         return {
             "answer": None,
-            "retrieval_attempts": retrieval_log,
+            "retrieval_attempts": [{"query_used": query, "docs_found": 0}],
             "final_verdict": "insufficient",
             "escalate": True,
-            "escalation_reason": (
-                f"Could not find sufficient information after {MAX_ATTEMPTS} "
-                f"retrieval attempts. Last reason: {retrieval_log[-1].get('reason', 'unknown')}"
-            ),
+            "escalation_reason": "No documents retrieved — vectorstore may be empty or unavailable",
         }
 
-    # --- Step E: Sufficient — generate answer from retrieved context ---
-    llm = _get_llm(temperature=0.3)
+    top_score = docs[0]["score"]
 
-    context = "\n\n---\n\n".join(doc["content"] for doc in sufficient_docs)
+    # FAISS L2 score threshold check: lower is better (usually < 1.6 indicates good match)
+    if top_score > 1.6:
+        return {
+            "answer": None,
+            "retrieval_attempts": [{"query_used": query, "docs_found": len(docs), "top_score": top_score}],
+            "final_verdict": "insufficient",
+            "escalate": True,
+            "escalation_reason": f"Retrieved context matching score ({top_score}) is below relevance threshold.",
+        }
 
-    answer_prompt = f"""You are a friendly, professional customer support agent for Date AI.
-Answer the user's question based ONLY on the provided knowledge base context.
-
-KNOWLEDGE BASE CONTEXT:
-{context}
-
-USER QUESTION: {query}
-
-Rules:
-- Answer accurately using only the provided context
-- If the context partially answers the question, share what you can and note what's missing
-- Be concise but thorough
-- Do NOT fabricate information not present in the context
-- If relevant, suggest the user contact support for further help"""
-
-    response = llm.invoke([HumanMessage(content=answer_prompt)])
-    answer_str = _get_content_text(response.content)
+    context = "\n\n---\n\n".join(doc["content"] for doc in docs)
 
     return {
-        "answer": answer_str,
-        "retrieval_attempts": retrieval_log,
+        "answer": context,
+        "retrieval_attempts": [{"query_used": query, "docs_found": len(docs), "top_score": top_score}],
         "final_verdict": "sufficient",
         "escalate": False,
         "escalation_reason": None,
     }
+
 
 
 # ============================================================
