@@ -42,7 +42,7 @@ except Exception:
 def _get_llm(temperature: float = 0.3) -> ChatGoogleGenerativeAI:
     """Returns a ChatGoogleGenerativeAI instance matching the existing utils.py config."""
     return ChatGoogleGenerativeAI(
-        model="gemini-1.5-flash",
+        model="gemini-1.5-flash-latest",
         google_api_key=GOOGLE_API_KEY,
         temperature=temperature,
     )
