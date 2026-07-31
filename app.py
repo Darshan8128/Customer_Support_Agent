@@ -58,6 +58,7 @@ for key, default in [
     ("knowledge_updated", False),
     ("files", []),
     ("language_code", "en"),
+    ("selected_language", "🇺🇸 English"),
     ("session_id", None),
 ]:
     if key not in st.session_state:
@@ -105,7 +106,7 @@ def send_query(query, enable_voice=None):
         session_id=st.session_state.session_id, role="user", content=query
     )
 
-    selected_lang = st.session_state.get("selected_language", "🌐 Auto-Detect")
+    selected_lang = st.session_state.get("selected_language", "🇺🇸 English")
     lang_code = LANGUAGES.get(selected_lang, "auto")
     if lang_code == "auto":
         language_code = detect_language(query)
